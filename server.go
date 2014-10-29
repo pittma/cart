@@ -1,29 +1,45 @@
-package httprouter
+package cart
 
 import (
-    "net/http"
+	"net/http"
+	"strconv"
 )
 
 type Server struct {
-    router Router
+	Port   port
+	router *router
 }
 
+type port int
 
-func NewRouter(notFoundHandler RouterCallback) *Server {
-    routes := make([]*Route, 0)
-    r := Router{routes, notFoundHandler}
-    return &Server{r}
+type RouterCallback func(*http.Request, http.ResponseWriter, map[string]string)
+
+func (p port) String() string {
+	return ":" + strconv.Itoa(int(p))
+}
+
+func NewServer(prt int, notFoundHandler RouterCallback) *Server {
+	routes := make([]*route, 0)
+	r := &router{
+		Routes: routes,
+
+		notFoundHandler: notFoundHandler,
+	}
+	return &Server{
+		Port: port(prt),
+
+		router: r,
+	}
 }
 
 func (s *Server) Get(path string, callback RouterCallback) {
-    s.router.AddToRoutes(path, callback, "GET")
+	s.router.AddToRoutes(path, callback, "GET")
 }
 
 func (s *Server) Post(path string, callback RouterCallback) {
-    s.router.AddToRoutes(path, callback, "POST")
+	s.router.AddToRoutes(path, callback, "POST")
 }
 
-func (s *Server) Start() {
-    http.HandleFunc("/", s.router.RouteRequest)
-    http.ListenAndServe(":8080", nil)
+func (s *Server) Serve() {
+	http.ListenAndServe(s.Port.String(), s.router)
 }
