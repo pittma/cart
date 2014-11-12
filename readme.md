@@ -3,6 +3,7 @@ cart
 
 Map your URIs
 
+### This app:
 ```go
 package main
 
@@ -28,11 +29,14 @@ func main() {
                 fmt.Fprintf(rsp, "hello "+params["you"]+", from "+params["me"])
         })
 
+	server.Serve()
+
 }
 ```
 
+### Would do this:
 ```
-$ curl http://localhost:8080/hi/cheese/dan
+$ curl http://localhost:8080/cheese/dan
 dan
 
 $ curl http://localhost:8080/hi/dan/its/meg
